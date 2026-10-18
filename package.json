@@ -1,0 +1,21 @@
+{
+  "name": "aiprepkit",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Turns a job description into a personalised interview preparation kit.",
+  "workspaces": [
+    "packages/*",
+    "server",
+    "web"
+  ],
+  "scripts": {
+    "evaluate": "npm run evaluate -w @aiprepkit/server --",
+    "dev:api": "npm run dev -w @aiprepkit/server",
+    "dev:web": "npm run dev -w @aiprepkit/web",
+    "build": "npm run build -w @aiprepkit/core && npm run build -w @aiprepkit/server && npm run build -w @aiprepkit/web",
+    "test": "npm run test -w @aiprepkit/core && npm run test -w @aiprepkit/server"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

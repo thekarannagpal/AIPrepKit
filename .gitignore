@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.next/
+out/
+.env
+*.log
+.DS_Store
+coverage/
+kits.json
+tmp/
