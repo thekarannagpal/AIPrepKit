@@ -71,7 +71,7 @@ export function validateKit(candidate: unknown): ValidationResult {
     errors.push("coverage.uncovered_requirement_ids does not match the actual coverage");
   }
 
-  return { ok: errors.length === 0, errors, repairs: [] };
+  return { ok: errors.length === 0, errors, kit, repairs: [] };
 }
 
 /**
