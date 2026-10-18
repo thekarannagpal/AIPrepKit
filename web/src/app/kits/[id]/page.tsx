@@ -117,6 +117,19 @@ export default function KitPage() {
     );
   }
 
+  if (kit.status === "failed" && !kit.questions?.length) {
+    // Failed before any content existed (bad URL, interrupted run, provider
+    // error) — show the structured reason instead of an empty shell.
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-6">
+        <ErrorState
+          message={kit.error?.message || "This kit could not be generated."}
+          retry={fetchKit}
+        />
+      </div>
+    );
+  }
+
   const handleBriefChange = (field: "summary" | "what_they_do", value: string) => {
     setEditedBrief((prev: any) => ({ ...prev, [field]: value }));
     setSaveStatus("Unsaved changes");

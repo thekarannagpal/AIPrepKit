@@ -67,8 +67,10 @@ kitsRouter.post("/", async (req: AuthedRequest, res, next) => {
       kit: null,
     });
 
-    // Fire and forget: the UI watches progress over SSE.
-    void generate(doc._id.toString());
+    // Fire and forget: the UI watches progress over SSE. kickOff registers
+    // the id synchronously, so no reader can mistake this live run for one
+    // stranded by a restart.
+    kickOff(doc._id.toString());
 
     res.status(201).json({ kit: publicKit(doc), deduplicated: false });
   } catch (err) {
@@ -116,7 +118,7 @@ kitsRouter.post("/batch", async (req: AuthedRequest, res, next) => {
     // Kick off sequentially: the LLM rate budget is shared, and parallel
     // starts would just queue on the same limiter anyway.
     for (const entry of created) {
-      if (!entry.deduplicated) void generate(String((entry.kit as any)._id));
+      if (!entry.deduplicated) kickOff(String((entry.kit as any)._id));
     }
     res.status(201).json({ kits: created });
   } catch (err) {
@@ -189,17 +191,52 @@ async function generate(kitId: string): Promise<void> {
 /**
  * Fire-and-forget entry: callers use `kickOff` so a rejection can never
  * become an unhandled promise rejection (which would take the API down).
+ * The kit id joins `activeGenerations` synchronously, so any reader can
+ * tell a live run from one stranded by a restart (see recoverIfStale).
  */
+const activeGenerations = new Set<string>();
+
 function kickOff(kitId: string): void {
-  generate(kitId).catch(async (err) => {
-    const error = {
-      code: (err as { code?: string }).code ?? "INTERNAL",
-      message: err instanceof Error ? err.message : String(err),
-    };
-    log.error("kit generation crashed", { kitId, code: error.code, message: error.message });
-    await KitModel.updateOne({ _id: kitId }, { $set: { status: "failed", error } }).catch(() => undefined);
-    publish(kitId, { type: "failed", error });
-  });
+  activeGenerations.add(kitId);
+  generate(kitId)
+    .catch(async (err) => {
+      const error = {
+        code: (err as { code?: string }).code ?? "INTERNAL",
+        message: err instanceof Error ? err.message : String(err),
+      };
+      log.error("kit generation crashed", { kitId, code: error.code, message: error.message });
+      await KitModel.updateOne({ _id: kitId }, { $set: { status: "failed", error } }).catch(() => undefined);
+      publish(kitId, { type: "failed", error });
+    })
+    .finally(() => activeGenerations.delete(kitId));
+}
+
+type KitDoc = NonNullable<Awaited<ReturnType<typeof KitModel.findOne>>>;
+
+/**
+ * Generation lives in this process. If the process dies mid-run, the document
+ * is stranded in queued/running forever: no `done` event will ever arrive and
+ * the UI would show progress that never resolves. The first reader to touch
+ * such a kit fails it with a structured error instead of leaving a ghost.
+ * The grace period covers the window between document creation and kick-off
+ * (the batch route creates all documents first, then starts them).
+ */
+async function recoverIfStale(doc: any | null | undefined): Promise<void> {
+  if (!doc) return;
+  if (doc.status !== "queued" && doc.status !== "running") return;
+  if (activeGenerations.has(String(doc._id))) return;
+  const createdAt = new Date((doc as unknown as { createdAt?: Date }).createdAt ?? 0).getTime();
+  if (createdAt && Date.now() - createdAt < 120_000) return;
+
+  doc.status = "failed";
+  doc.error = {
+    code: "INTERRUPTED",
+    message:
+      "Generation was interrupted before it finished (the server restarted mid-run). Create the kit again to regenerate it.",
+  };
+  await doc.save();
+  publish(String(doc._id), { type: "failed", error: doc.error });
+  log.warn("recovered stale kit", { kitId: String(doc._id) });
 }
 
 /* ------------------------------------------------------------------- lists */
@@ -499,6 +536,13 @@ kitsRouter.post("/:id/compare", async (req: AuthedRequest, res, next) => {
 async function ownKit(req: AuthedRequest) {
   const doc = await KitModel.findOne({ _id: req.params.id, userId: req.userId });
   if (!doc) throw notFound("Kit not found.");
+  await recoverIfStale(doc);
+  // reload in case recoverIfStale mutated it
+  if (doc.status === "failed" && !doc.kit) {
+    // re-fetch the persisted failed state
+    const fresh = await KitModel.findOne({ _id: req.params.id, userId: req.userId });
+    if (fresh) return fresh;
+  }
   return doc;
 }
 

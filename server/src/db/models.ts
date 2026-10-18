@@ -13,7 +13,9 @@ const sessionSchema = new mongoose.Schema(
     // Stored hashed: a database leak does not leak live sessions.
     tokenHash: { type: String, required: true, unique: true, index: true },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
-    expiresAt: { type: Date, required: true, index: true },
+    // Indexed (with TTL) by sessionSchema.index below — declaring it here too
+    // would register the same index twice and warn on every boot.
+    expiresAt: { type: Date, required: true },
   },
   { timestamps: true }
 );
