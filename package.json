@@ -9,7 +9,7 @@
     "web"
   ],
   "scripts": {
-    "evaluate": "npm run evaluate -w @aiprepkit/server --",
+    "evaluate": "npm run build -w @aiprepkit/core && npm run evaluate -w @aiprepkit/server --",
     "dev:api": "npm run dev -w @aiprepkit/server",
     "dev:web": "npm run dev -w @aiprepkit/web",
     "build": "npm run build -w @aiprepkit/core && npm run build -w @aiprepkit/server && npm run build -w @aiprepkit/web",

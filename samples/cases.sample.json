@@ -1,0 +1,20 @@
+[
+  {
+    "id": "northwind-backend",
+    "jd": "Senior Backend Engineer at Northwind Logistics (Berlin / Remote)\n\nWe are hiring a Senior Backend Engineer for the dispatcher team.\n\nRequirements:\n- 5+ years building production services in Go or Node.js\n- Strong PostgreSQL skills: schema design, partitioning, query tuning\n- Experience scaling event-driven systems beyond 10k events/second\n- You have mentored engineers and run design reviews\n- Bonus: Kubernetes and infrastructure-as-code in production\n\nYou will own services that plan routes for thousands of trucks a day.",
+    "company_url": "http://127.0.0.1:4173",
+    "days": 4
+  },
+  {
+    "id": "thin-stub",
+    "jd": "Need a developer. Must know JavaScript.",
+    "company_url": "",
+    "days": 1
+  },
+  {
+    "id": "unreachable-site",
+    "jd": "Platform Engineer (remote)\n\nRequirements:\n- Experience operating services on AWS\n- Comfortable with Terraform and CI/CD pipelines\n- Solid Python or Go scripting skills\n- Must communicate clearly across teams",
+    "company_url": "http://127.0.0.1:59123",
+    "days": 7
+  }
+]

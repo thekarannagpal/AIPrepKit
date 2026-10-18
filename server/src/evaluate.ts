@@ -35,22 +35,47 @@ interface OutputKitEntry {
 }
 
 async function main() {
-  const { values } = parseArgs({
+  const { values, positionals } = parseArgs({
     options: {
       input: { type: "string", short: "i" },
-      output: { type: "string", short: "o", default: "kits.json" },
+      output: { type: "string", short: "o" },
       "only-first": { type: "string" }, // dev helper, not part of the brief
     },
-    allowPositionals: false,
+    allowPositionals: true,
   });
 
-  if (!values.input) {
+  // Windows PowerShell drops `--flag` tokens when npm runs a script (their
+  // values survive as positionals); cmd/bash deliver the documented flags.
+  // Accept both shapes: `--input <in> --output <out>` | `<in> [out]`.
+  const inputArg = values.input ?? positionals[0];
+  const outputArg = values.output ?? positionals[1] ?? "kits.json";
+
+  if (!inputArg || positionals.length > 2) {
     process.stderr.write("Usage: npm run evaluate -- --input <cases.json> --output <kits.json>\n");
     process.exit(2);
   }
 
-  const inputPath = path.resolve(String(values.input));
-  const outputPath = path.resolve(String(values.output));
+  // Fail fast with guidance rather than recording every case as failed.
+  if (env.llm.provider === "gemini" && !env.llm.geminiApiKey) {
+    process.stderr.write(
+      "LLM_PROVIDER=gemini but GEMINI_API_KEY is empty.\n" +
+        "Set it in .env (see .env.example), or run without any key using LLM_PROVIDER=mock.\n"
+    );
+    process.exit(2);
+  }
+  if (env.llm.provider === "openai" && !env.llm.openaiApiKey) {
+    process.stderr.write(
+      "LLM_PROVIDER=openai but OPENAI_API_KEY is empty.\n" +
+        "Set it in .env (see .env.example), or run without any key using LLM_PROVIDER=mock.\n"
+    );
+    process.exit(2);
+  }
+
+  // npm runs this script with cwd=server/, but relative --input/--output
+  // paths are written from where the user invoked npm (INIT_CWD).
+  const baseDir = process.env.INIT_CWD || process.cwd();
+  const inputPath = path.resolve(baseDir, String(inputArg));
+  const outputPath = path.resolve(baseDir, String(outputArg));
 
   let parsedCases: unknown;
   try {

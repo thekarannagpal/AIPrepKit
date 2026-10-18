@@ -1,0 +1,730 @@
+{
+  "version": "1.0",
+  "generated_at": "2026-10-18T11:45:16.828Z",
+  "kits": [
+    {
+      "id": "northwind-backend",
+      "status": "ok",
+      "kit": {
+        "source": {
+          "company": "MockCo",
+          "company_url": "http://127.0.0.1:4173/",
+          "role": "Senior Backend Engineer at Northwind Logistics (Berlin / Remote)",
+          "location": "Remote",
+          "jd_chars": 524,
+          "researched_at": "2026-10-18T11:45:16.017Z",
+          "pages_used": [
+            "http://127.0.0.1:4173/",
+            "http://127.0.0.1:4173/handbook/how-we-hire"
+          ],
+          "research_log": [
+            {
+              "url": "http://127.0.0.1:4173/",
+              "status": "fetched",
+              "note": "homepage — Northwind Logistics"
+            },
+            {
+              "url": "http://127.0.0.1:4173/handbook/how-we-hire",
+              "status": "fetched",
+              "note": "How we hire [score 35: hiring:3, anchor-hiring]"
+            },
+            {
+              "url": "http://127.0.0.1:4173",
+              "status": "fetched",
+              "note": "hiring/process content found at 2 page(s)"
+            },
+            {
+              "url": "https://www.reddit.com/search.json?q=Northwind%20interview&limit=8&sort=relevance",
+              "status": "skipped",
+              "note": "HTTP 403"
+            },
+            {
+              "url": "https://old.reddit.com/search.json?q=Northwind%20interview&limit=8&sort=relevance",
+              "status": "skipped",
+              "note": "reddit returned unparseable JSON"
+            },
+            {
+              "url": "https://html.duckduckgo.com/html/?q=…",
+              "status": "fetched",
+              "note": "0 web results"
+            },
+            {
+              "url": "https://lite.duckduckgo.com/lite/?q=…",
+              "status": "fetched",
+              "note": "0 web results"
+            },
+            {
+              "url": "(search)",
+              "status": "skipped",
+              "note": "no public interview discussion found"
+            }
+          ]
+        },
+        "company_brief": {
+          "summary": "MockCo builds developer tooling used by thousands of teams.",
+          "what_they_do": "MockCo sells a hosted platform for release automation.",
+          "sources": [
+            "http://127.0.0.1:4173/",
+            "http://127.0.0.1:4173/handbook/how-we-hire"
+          ]
+        },
+        "role": {
+          "title": "Senior Backend Engineer at Northwind Logistics (Berlin / Remote)",
+          "seniority": "senior",
+          "responsibilities": [
+            "- 5+ years building production services in Go or Node.js",
+            "You will own services that plan routes for thousands of trucks a day."
+          ],
+          "requirements": [
+            {
+              "id": "r1",
+              "text": "Senior Backend Engineer at Northwind Logistics (Berlin / Remote)",
+              "kind": "technical",
+              "priority": "must"
+            },
+            {
+              "id": "r2",
+              "text": "We are hiring a Senior Backend Engineer for the dispatcher team.",
+              "kind": "technical",
+              "priority": "must"
+            },
+            {
+              "id": "r3",
+              "text": "5+ years building production services in Go or Node.js",
+              "kind": "technical",
+              "priority": "must"
+            },
+            {
+              "id": "r4",
+              "text": "Strong PostgreSQL skills: schema design, partitioning, query tuning",
+              "kind": "technical",
+              "priority": "must"
+            },
+            {
+              "id": "r5",
+              "text": "Experience scaling event-driven systems beyond 10k events/second",
+              "kind": "domain",
+              "priority": "must"
+            },
+            {
+              "id": "r6",
+              "text": "You have mentored engineers and run design reviews",
+              "kind": "technical",
+              "priority": "must"
+            },
+            {
+              "id": "r7",
+              "text": "Bonus: Kubernetes and infrastructure-as-code in production",
+              "kind": "technical",
+              "priority": "nice"
+            },
+            {
+              "id": "r8",
+              "text": "You will own services that plan routes for thousands of trucks a day.",
+              "kind": "domain",
+              "priority": "must"
+            }
+          ]
+        },
+        "questions": [
+          {
+            "id": "q1",
+            "requirement_ids": [
+              "r1"
+            ],
+            "category": "technical",
+            "prompt": "Mock question 1 for r1 (questions_technical): explain your experience with concrete examples.",
+            "answer_outline": "- point one\n- point two\n- point three",
+            "difficulty": 1,
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          },
+          {
+            "id": "q2",
+            "requirement_ids": [
+              "r2"
+            ],
+            "category": "technical",
+            "prompt": "Mock question 2 for r2 (questions_technical): explain your experience with concrete examples.",
+            "answer_outline": "- point one\n- point two\n- point three",
+            "difficulty": 2,
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          },
+          {
+            "id": "q3",
+            "requirement_ids": [
+              "r3"
+            ],
+            "category": "technical",
+            "prompt": "Mock question 3 for r3 (questions_technical): explain your experience with concrete examples.",
+            "answer_outline": "- point one\n- point two\n- point three",
+            "difficulty": 3,
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          },
+          {
+            "id": "q4",
+            "requirement_ids": [
+              "r4"
+            ],
+            "category": "technical",
+            "prompt": "Mock question 4 for r4 (questions_technical): explain your experience with concrete examples.",
+            "answer_outline": "- point one\n- point two\n- point three",
+            "difficulty": 1,
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          },
+          {
+            "id": "q5",
+            "requirement_ids": [
+              "r6"
+            ],
+            "category": "technical",
+            "prompt": "Mock question 5 for r6 (questions_technical): explain your experience with concrete examples.",
+            "answer_outline": "- point one\n- point two\n- point three",
+            "difficulty": 2,
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          },
+          {
+            "id": "q6",
+            "requirement_ids": [
+              "r7"
+            ],
+            "category": "technical",
+            "prompt": "Mock question 6 for r7 (questions_technical): explain your experience with concrete examples.",
+            "answer_outline": "- point one\n- point two\n- point three",
+            "difficulty": 3,
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          },
+          {
+            "id": "q7",
+            "requirement_ids": [
+              "r7"
+            ],
+            "category": "system-design",
+            "prompt": "Mock question 1 for r7 (questions_system_design): explain your experience with concrete examples.",
+            "answer_outline": "- point one\n- point two\n- point three",
+            "difficulty": 1,
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          },
+          {
+            "id": "q8",
+            "requirement_ids": [
+              "r5"
+            ],
+            "category": "company-fit",
+            "prompt": "Mock question 1 for r5 (questions_company_fit): explain your experience with concrete examples.",
+            "answer_outline": "- point one\n- point two\n- point three",
+            "difficulty": 1,
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          },
+          {
+            "id": "q9",
+            "requirement_ids": [
+              "r8"
+            ],
+            "category": "company-fit",
+            "prompt": "Mock question 2 for r8 (questions_company_fit): explain your experience with concrete examples.",
+            "answer_outline": "- point one\n- point two\n- point three",
+            "difficulty": 2,
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          }
+        ],
+        "flashcards": [
+          {
+            "id": "f1",
+            "front": "Mock card 1 (r1)?",
+            "back": "Mock answer covering r1.",
+            "requirement_ids": [
+              "r1"
+            ],
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          },
+          {
+            "id": "f2",
+            "front": "Mock card 2 (r2)?",
+            "back": "Mock answer covering r2.",
+            "requirement_ids": [
+              "r2"
+            ],
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          },
+          {
+            "id": "f3",
+            "front": "Mock card 3 (r3)?",
+            "back": "Mock answer covering r3.",
+            "requirement_ids": [
+              "r3"
+            ],
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          },
+          {
+            "id": "f4",
+            "front": "Mock card 4 (r4)?",
+            "back": "Mock answer covering r4.",
+            "requirement_ids": [
+              "r4"
+            ],
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          },
+          {
+            "id": "f5",
+            "front": "Mock card 5 (r5)?",
+            "back": "Mock answer covering r5.",
+            "requirement_ids": [
+              "r5"
+            ],
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          },
+          {
+            "id": "f6",
+            "front": "Mock card 6 (r6)?",
+            "back": "Mock answer covering r6.",
+            "requirement_ids": [
+              "r6"
+            ],
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          }
+        ],
+        "schedule": {
+          "days_available": 4,
+          "days": [
+            {
+              "day": 1,
+              "focus": "Start strong: 2 technical, 1 system-design — 3 questions, ~105 min.",
+              "question_ids": [
+                "q3",
+                "q6",
+                "q7"
+              ],
+              "minutes": 105
+            },
+            {
+              "day": 2,
+              "focus": "Continue: 2 technical — 2 questions, ~45 min.",
+              "question_ids": [
+                "q2",
+                "q1"
+              ],
+              "minutes": 45
+            },
+            {
+              "day": 3,
+              "focus": "Continue: 2 technical — 2 questions, ~45 min.",
+              "question_ids": [
+                "q5",
+                "q4"
+              ],
+              "minutes": 45
+            },
+            {
+              "day": 4,
+              "focus": "Continue: 2 company-fit — 2 questions, ~45 min.",
+              "question_ids": [
+                "q9",
+                "q8"
+              ],
+              "minutes": 45
+            }
+          ]
+        },
+        "coverage": {
+          "uncovered_requirement_ids": [],
+          "passes": 1,
+          "uncovered_must_requirement_ids": []
+        },
+        "notes": [
+          "No public discussion of Northwind's interview process was found."
+        ]
+      },
+      "error": null
+    },
+    {
+      "id": "thin-stub",
+      "status": "ok",
+      "kit": {
+        "source": {
+          "company": "MockCo",
+          "company_url": "",
+          "role": "Need a developer. Must know JavaScript.",
+          "location": "",
+          "jd_chars": 39,
+          "researched_at": "2026-10-18T11:45:16.021Z",
+          "pages_used": [],
+          "research_log": []
+        },
+        "company_brief": {
+          "summary": "No company website was supplied. Everything below comes from the job description alone.",
+          "what_they_do": "",
+          "sources": []
+        },
+        "role": {
+          "title": "Need a developer. Must know JavaScript.",
+          "seniority": "mid",
+          "responsibilities": [],
+          "requirements": [
+            {
+              "id": "r1",
+              "text": "Need a developer. Must know JavaScript.",
+              "kind": "technical",
+              "priority": "must"
+            }
+          ]
+        },
+        "questions": [
+          {
+            "id": "q1",
+            "requirement_ids": [
+              "r1"
+            ],
+            "category": "technical",
+            "prompt": "Mock question 1 for r1 (questions_technical): explain your experience with concrete examples.",
+            "answer_outline": "- point one\n- point two\n- point three",
+            "difficulty": 1,
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          }
+        ],
+        "flashcards": [
+          {
+            "id": "f1",
+            "front": "Mock card 1 (r1)?",
+            "back": "Mock answer covering r1.",
+            "requirement_ids": [
+              "r1"
+            ],
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          }
+        ],
+        "schedule": {
+          "days_available": 1,
+          "days": [
+            {
+              "day": 1,
+              "focus": "Start strong: 1 technical — 1 question, ~15 min.",
+              "question_ids": [
+                "q1"
+              ],
+              "minutes": 15
+            }
+          ]
+        },
+        "coverage": {
+          "uncovered_requirement_ids": [],
+          "passes": 1,
+          "uncovered_must_requirement_ids": []
+        },
+        "notes": [
+          "No company website supplied; the brief will be built from the description alone.",
+          "The description is thin; expect a correspondingly small question bank."
+        ]
+      },
+      "error": null
+    },
+    {
+      "id": "unreachable-site",
+      "status": "ok",
+      "kit": {
+        "source": {
+          "company": "MockCo",
+          "company_url": "http://127.0.0.1:59123/",
+          "role": "Platform Engineer (remote)",
+          "location": "Remote",
+          "jd_chars": 207,
+          "researched_at": "2026-10-18T11:45:16.823Z",
+          "pages_used": [],
+          "research_log": [
+            {
+              "url": "http://127.0.0.1:59123/robots.txt",
+              "status": "error",
+              "note": "robots.txt fetch failed; proceeding with caution"
+            },
+            {
+              "url": "http://127.0.0.1:59123/",
+              "status": "error",
+              "note": "fetch failed"
+            }
+          ]
+        },
+        "company_brief": {
+          "summary": "The company website could not be retrieved, so no factual brief is available. Everything below comes from the job description alone.",
+          "what_they_do": "",
+          "sources": []
+        },
+        "role": {
+          "title": "Platform Engineer (remote)",
+          "seniority": "mid",
+          "responsibilities": [],
+          "requirements": [
+            {
+              "id": "r1",
+              "text": "Platform Engineer (remote)",
+              "kind": "technical",
+              "priority": "must"
+            },
+            {
+              "id": "r2",
+              "text": "Experience operating services on AWS",
+              "kind": "technical",
+              "priority": "must"
+            },
+            {
+              "id": "r3",
+              "text": "Comfortable with Terraform and CI/CD pipelines",
+              "kind": "domain",
+              "priority": "must"
+            },
+            {
+              "id": "r4",
+              "text": "Solid Python or Go scripting skills",
+              "kind": "technical",
+              "priority": "must"
+            },
+            {
+              "id": "r5",
+              "text": "Must communicate clearly across teams",
+              "kind": "behavioural",
+              "priority": "must"
+            }
+          ]
+        },
+        "questions": [
+          {
+            "id": "q1",
+            "requirement_ids": [
+              "r1"
+            ],
+            "category": "technical",
+            "prompt": "Mock question 1 for r1 (questions_technical): explain your experience with concrete examples.",
+            "answer_outline": "- point one\n- point two\n- point three",
+            "difficulty": 1,
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          },
+          {
+            "id": "q2",
+            "requirement_ids": [
+              "r2"
+            ],
+            "category": "technical",
+            "prompt": "Mock question 2 for r2 (questions_technical): explain your experience with concrete examples.",
+            "answer_outline": "- point one\n- point two\n- point three",
+            "difficulty": 2,
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          },
+          {
+            "id": "q3",
+            "requirement_ids": [
+              "r4"
+            ],
+            "category": "technical",
+            "prompt": "Mock question 3 for r4 (questions_technical): explain your experience with concrete examples.",
+            "answer_outline": "- point one\n- point two\n- point three",
+            "difficulty": 3,
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          },
+          {
+            "id": "q4",
+            "requirement_ids": [
+              "r5"
+            ],
+            "category": "behavioural",
+            "prompt": "Mock question 1 for r5 (questions_behavioural): explain your experience with concrete examples.",
+            "answer_outline": "- point one\n- point two\n- point three",
+            "difficulty": 1,
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          },
+          {
+            "id": "q5",
+            "requirement_ids": [
+              "r1"
+            ],
+            "category": "system-design",
+            "prompt": "Mock question 1 for r1 (questions_system_design): explain your experience with concrete examples.",
+            "answer_outline": "- point one\n- point two\n- point three",
+            "difficulty": 1,
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          },
+          {
+            "id": "q6",
+            "requirement_ids": [
+              "r3"
+            ],
+            "category": "company-fit",
+            "prompt": "Mock question 1 for r3 (questions_company_fit): explain your experience with concrete examples.",
+            "answer_outline": "- point one\n- point two\n- point three",
+            "difficulty": 1,
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          }
+        ],
+        "flashcards": [
+          {
+            "id": "f1",
+            "front": "Mock card 1 (r1)?",
+            "back": "Mock answer covering r1.",
+            "requirement_ids": [
+              "r1"
+            ],
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          },
+          {
+            "id": "f2",
+            "front": "Mock card 2 (r2)?",
+            "back": "Mock answer covering r2.",
+            "requirement_ids": [
+              "r2"
+            ],
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          },
+          {
+            "id": "f3",
+            "front": "Mock card 3 (r3)?",
+            "back": "Mock answer covering r3.",
+            "requirement_ids": [
+              "r3"
+            ],
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          },
+          {
+            "id": "f4",
+            "front": "Mock card 4 (r4)?",
+            "back": "Mock answer covering r4.",
+            "requirement_ids": [
+              "r4"
+            ],
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          },
+          {
+            "id": "f5",
+            "front": "Mock card 5 (r5)?",
+            "back": "Mock answer covering r5.",
+            "requirement_ids": [
+              "r5"
+            ],
+            "origin": "generated",
+            "edited": false,
+            "pinned": false
+          }
+        ],
+        "schedule": {
+          "days_available": 7,
+          "days": [
+            {
+              "day": 1,
+              "focus": "Start strong: 1 technical — 1 question, ~45 min.",
+              "question_ids": [
+                "q3"
+              ],
+              "minutes": 45
+            },
+            {
+              "day": 2,
+              "focus": "Continue: 1 technical — 1 question, ~30 min.",
+              "question_ids": [
+                "q2"
+              ],
+              "minutes": 30
+            },
+            {
+              "day": 3,
+              "focus": "Continue: 1 technical — 1 question, ~15 min.",
+              "question_ids": [
+                "q1"
+              ],
+              "minutes": 15
+            },
+            {
+              "day": 4,
+              "focus": "Continue: 1 behavioural — 1 question, ~15 min.",
+              "question_ids": [
+                "q4"
+              ],
+              "minutes": 15
+            },
+            {
+              "day": 5,
+              "focus": "Continue: 1 system-design — 1 question, ~15 min.",
+              "question_ids": [
+                "q5"
+              ],
+              "minutes": 15
+            },
+            {
+              "day": 6,
+              "focus": "Continue: 1 company-fit — 1 question, ~15 min.",
+              "question_ids": [
+                "q6"
+              ],
+              "minutes": 15
+            },
+            {
+              "day": 7,
+              "focus": "Consolidation — revisit flashcards and any day that felt weak; no new questions allocated.",
+              "question_ids": [],
+              "minutes": 0
+            }
+          ]
+        },
+        "coverage": {
+          "uncovered_requirement_ids": [],
+          "passes": 1,
+          "uncovered_must_requirement_ids": []
+        },
+        "notes": [
+          "The company site could not be retrieved; no website content informed this kit.",
+          "The description is thin; expect a correspondingly small question bank."
+        ]
+      },
+      "error": null
+    }
+  ]
+}

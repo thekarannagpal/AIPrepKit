@@ -112,10 +112,12 @@ export class LlmClient {
       );
     }
     this.calls++;
-    const limiter = getLimiter();
+    // The mock provider is offline: throttling would only slow local runs and
+    // the batch evaluator, with no real API budget to protect.
+    const limiter = this.provider instanceof MockProvider ? null : getLimiter();
     return callWithRetry(
       async () => {
-        await limiter.acquire();
+        if (limiter) await limiter.acquire();
         return this.provider.complete({
           messages,
           json,
