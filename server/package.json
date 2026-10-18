@@ -1,0 +1,31 @@
+{
+  "name": "@aiprepkit/server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Express API, research/generation pipeline and batch evaluation entry point.",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "evaluate": "tsx src/evaluate.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@aiprepkit/core": "*",
+    "bcryptjs": "^2.4.3",
+    "cheerio": "^1.0.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "mongoose": "^8.8.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.9.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.9"
+  }
+}
