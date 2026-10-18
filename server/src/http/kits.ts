@@ -131,6 +131,21 @@ async function generate(kitId: string): Promise<void> {
   doc.status = "running";
   await doc.save();
 
+  // Every write to this document goes through one queue: mongoose throws a
+  // ParallelSaveError if save() is called while another save is in flight,
+  // and step events can easily fire while the final save is running.
+  let saveChain: Promise<void> = Promise.resolve();
+  const enqueueSave = (): Promise<void> => {
+    saveChain = saveChain
+      .then(async () => {
+        await doc.save();
+      })
+      .catch((err) => {
+        log.warn("kit save failed", { kitId, err: err instanceof Error ? err.message : String(err) });
+      });
+    return saveChain;
+  };
+
   const llm = new LlmClient({});
   try {
     const input = doc.input!;
@@ -146,8 +161,7 @@ async function generate(kitId: string): Promise<void> {
               step.status = event.status === "started" ? "started" : event.status;
               if (event.detail) step.detail = event.detail;
             }
-            // Persist occasionally, not per event — Mongo writes are not free.
-            void doc.save();
+            void enqueueSave();
           }
         },
       }
@@ -160,16 +174,32 @@ async function generate(kitId: string): Promise<void> {
       llmCalls: llm.callCount,
     };
     doc.version += 1;
-    await doc.save();
+    await enqueueSave();
     publish(kitId, { type: "done", kit: result.kit });
   } catch (err) {
     const e = err as { code?: string; message?: string };
     doc.status = "failed";
     doc.error = { code: e.code ?? "INTERNAL", message: e.message ?? "Generation failed." };
-    await doc.save();
+    await enqueueSave();
     publish(kitId, { type: "failed", error: doc.error });
     log.error("kit generation failed", { kitId, code: doc.error.code, message: doc.error.message });
   }
+}
+
+/**
+ * Fire-and-forget entry: callers use `kickOff` so a rejection can never
+ * become an unhandled promise rejection (which would take the API down).
+ */
+function kickOff(kitId: string): void {
+  generate(kitId).catch(async (err) => {
+    const error = {
+      code: (err as { code?: string }).code ?? "INTERNAL",
+      message: err instanceof Error ? err.message : String(err),
+    };
+    log.error("kit generation crashed", { kitId, code: error.code, message: error.message });
+    await KitModel.updateOne({ _id: kitId }, { $set: { status: "failed", error } }).catch(() => undefined);
+    publish(kitId, { type: "failed", error });
+  });
 }
 
 /* ------------------------------------------------------------------- lists */

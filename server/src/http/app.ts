@@ -13,6 +13,26 @@ export function buildApp(): express.Express {
   const app = express();
   app.disable("x-powered-by");
   app.use(express.json({ limit: "512kb" }));
+
+  // CORS: the web app normally reaches the API same-origin through Next's
+  // /api rewrite, but direct cross-origin access (curl from a different
+  // origin, split deployments) must be answered correctly. Only origins from
+  // WEB_ORIGIN are ever reflected, always with credentials.
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    const origin = req.headers.origin;
+    if (origin && env.webOrigins.includes(origin)) {
+      res.setHeader("Access-Control-Allow-Origin", origin);
+      res.setHeader("Access-Control-Allow-Credentials", "true");
+      res.setHeader("Vary", "Origin");
+      res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+      res.setHeader("Access-Control-Allow-Methods", "GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS");
+    }
+    if (req.method === "OPTIONS") {
+      res.status(204).end();
+      return;
+    }
+    next();
+  });
   app.use(originGuard);
 
   app.get("/api/health", (_req, res) => {
