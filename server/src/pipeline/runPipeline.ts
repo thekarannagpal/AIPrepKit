@@ -1,4 +1,5 @@
 import { z } from "zod";
+import net from "net";
 import {
   allocateSchedule,
   computeCoverage,
@@ -730,6 +731,8 @@ async function guessCompanyName(jd: string, companyUrl: string, llm: LlmClient):
   if (m) return { name: m[1] };
   if (companyUrl) {
     const host = hostLabel(companyUrl);
+    // Never derive a company name from an IP literal (localhost fixtures).
+    if (net.isIP(host)) return { name: "" };
     const base = host.split(".")[0];
     if (base && base.length >= 3 && base !== "www") return { name: base.charAt(0).toUpperCase() + base.slice(1) };
   }

@@ -6,6 +6,7 @@
  * always wins.
  */
 import { Fetcher } from "./fetcher";
+import { env } from "../config";
 
 interface Rule {
   path: string;
@@ -79,7 +80,7 @@ export class Robots {
     this.groups = groups;
     this.loaded = true;
 
-    const ua = (process.env.USER_AGENT ?? "aiprepkit").toLowerCase();
+    const ua = (env.crawl.userAgent || process.env.USER_AGENT || "aiprepkit").toLowerCase();
     const agentToken = ua.split("/")[0].split(/[ ()]/)[0];
     const exact = groups.find((g) => g.agents.some((a) => a === agentToken || ua.includes(a) && a !== "*"));
     const wildcard = groups.find((g) => g.agents.includes("*"));
@@ -115,9 +116,10 @@ export class Robots {
 /** robots patterns can use * and $ wildcards; support the common cases. */
 function matchesPattern(path: string, pattern: string): boolean {
   if (!pattern.includes("*") && !pattern.endsWith("$")) return path.startsWith(pattern);
-  const escaped = pattern
-    .replace(/[.+?^${}()|[\]\\]/g, "\\$&")
-    .replace(/\*/g, ".*")
-    .replace(/\$$/, "");
-  return new RegExp(`^${escaped}`).test(path);
+  // Strip the end-anchor BEFORE escaping, otherwise the escaped `\$` leaves a
+  // dangling backslash and the RegExp constructor throws.
+  const anchored = pattern.endsWith("$");
+  const body = anchored ? pattern.slice(0, -1) : pattern;
+  const escaped = body.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*");
+  return new RegExp(`^${escaped}${anchored ? "$" : ""}`).test(path);
 }

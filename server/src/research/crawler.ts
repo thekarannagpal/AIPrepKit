@@ -73,8 +73,19 @@ export async function crawlSite(startUrl: string, fetcher: Fetcher): Promise<Cra
     }
   }
 
-  const frontier = [...queued.values()].sort((a, b) => b.score - a.score);
+  const frontier: RankedLink[] = [];
   const seen = new Set<string>([homePage.url]);
+  // Robots pre-filter: every disallowed candidate is recorded up front so the
+  // research log stays honest even when the crawl stops before reaching it.
+  for (const c of [...queued.values()].sort((a, b) => b.score - a.score)) {
+    if (seen.has(c.href)) continue;
+    if (!canFetch(c.href)) {
+      researchLog.push({ url: c.href, status: "skipped", note: "disallowed by robots.txt" });
+      seen.add(c.href);
+      continue;
+    }
+    frontier.push(c);
+  }
   const crawlDelayMs = robots.crawlDelaySeconds
     ? Math.max(env.crawl.minIntervalMs, robots.crawlDelaySeconds * 1000)
     : env.crawl.minIntervalMs;

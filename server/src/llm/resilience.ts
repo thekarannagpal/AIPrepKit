@@ -9,18 +9,22 @@ import { log } from "../lib/logger";
 export class RateLimiter {
   private stamps: number[] = [];
 
-  constructor(private rpm: number) {}
+  constructor(
+    private rpm: number,
+    /** Window length; injectable so tests do not wait a real minute. */
+    private windowMs = 60_000
+  ) {}
 
   /** Resolves when a call slot is free. */
   async acquire(): Promise<void> {
     for (;;) {
       const now = Date.now();
-      this.stamps = this.stamps.filter((s) => now - s < 60_000);
+      this.stamps = this.stamps.filter((s) => now - s < this.windowMs);
       if (this.stamps.length < this.rpm) {
         this.stamps.push(now);
         return;
       }
-      const waitMs = this.stamps[0] + 60_000 - now + 10;
+      const waitMs = this.stamps[0] + this.windowMs - now + 10;
       await sleep(Math.min(Math.max(waitMs, 50), 5_000));
     }
   }

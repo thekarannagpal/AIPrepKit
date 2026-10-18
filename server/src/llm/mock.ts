@@ -61,8 +61,12 @@ export class MockProvider implements LlmProvider {
 }
 
 function reqIdsIn(prompt: string): string[] {
-  const matches = [...prompt.matchAll(/"id":\s*"(r\d+)"/g)].map((m) => m[1]);
-  return [...new Set(matches)];
+  // Prompts list requirements as "- id=r1 [technical/must] …"; the JSON
+  // shape "id": "r1" is accepted too so the mock keeps working if prompts
+  // change shape.
+  const ids = new Set<string>();
+  for (const m of prompt.matchAll(/\bid[=:]\s*"?(r\d+)"?/g)) ids.add(m[1]);
+  return [...ids];
 }
 
 function mockExtraction(prompt: string): string {

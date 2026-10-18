@@ -71,7 +71,10 @@ export class Fetcher {
         const body = await readCapped(res, env.crawl.fetchMaxBytes);
         return { url: guarded.href, status: res.status, contentType, body };
       } catch (err) {
-        if (attempt === 3) {
+        // Connection-level failures (refused, DNS, TLS) will not resolve by
+        // retrying moments later — fail fast so an unreachable host costs
+        // seconds, not a backoff ladder. Timeouts and resets still get retries.
+        if (attempt === 3 || !isTransientNetworkError(err)) {
           return { url: guarded.href, status: 0, contentType: "", body: "", error: describe(err) };
         }
         await sleep(backoffDelay(attempt));
@@ -106,6 +109,19 @@ async function readCapped(res: Response, maxBytes: number): Promise<string> {
   }
   const buf = Buffer.concat(chunks.map((c) => Buffer.from(c)));
   return buf.toString("utf-8").slice(0, maxBytes);
+}
+
+/** Errors that are worth retrying; everything else fails fast. */
+function isTransientNetworkError(err: unknown): boolean {
+  if (err instanceof Error) {
+    if (err.name === "TimeoutError" || err.name === "AbortError") return true;
+    const code = (err as NodeJS.ErrnoException & { cause?: { code?: string } }).cause?.code ?? (err as NodeJS.ErrnoException).code;
+    if (code && ["ECONNRESET", "ETIMEDOUT", "ECONNABORTED", "EAI_AGAIN", "UND_ERR_SOCKET"].includes(code)) {
+      return true;
+    }
+    return false;
+  }
+  return false;
 }
 
 function describe(err: unknown): string {

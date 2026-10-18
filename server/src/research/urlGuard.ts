@@ -91,7 +91,12 @@ export async function guardUrl(raw: string): Promise<GuardedUrl> {
 /** Resolve a possibly-relative link against a base URL. Exported for tests. */
 export function resolveLink(href: string, base: string): string | null {
   try {
-    return new URL(href, base).href;
+    const url = new URL(href, base);
+    // Only web links are ever crawlable; javascript:/mailto:/data: etc. are
+    // rejected here so no caller can accidentally fetch them.
+    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+    if (url.username || url.password) return null;
+    return url.href;
   } catch {
     return null;
   }
