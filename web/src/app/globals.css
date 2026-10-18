@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+* {
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500;
+}
+
+body {
+  @apply bg-slate-950 text-slate-100 min-h-screen;
+}
+
+button,
+input,
+textarea,
+select {
+  @apply focus-visible:ring-2 focus-visible:ring-indigo-500;
+}
