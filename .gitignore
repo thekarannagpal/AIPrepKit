@@ -8,3 +8,4 @@ out/
 coverage/
 kits.json
 tmp/
+*.tsbuildinfo

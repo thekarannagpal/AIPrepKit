@@ -10,9 +10,9 @@ import { z } from "zod";
 import { showToast } from "@/components/Toast";
 
 const singleSchema = z.object({
-  jd: z.string().min(1),
-  company_url: z.string().url().optional().or(z.literal("")),
-  days: z.number().int().min(1).max(60),
+  jd: z.string().min(1, "Job description is required"),
+  company_url: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  days: z.number().int().min(1, "Days must be between 1 and 60").max(60, "Days must be between 1 and 60"),
   force: z.boolean().optional(),
 });
 
@@ -33,7 +33,7 @@ export default function NewKitPage() {
   const [tab, setTab] = useState<"single" | "batch">("single");
   const [jd, setJd] = useState("");
   const [companyUrl, setCompanyUrl] = useState("");
-  const [days, setDays] = useState(7);
+  const [days, setDays] = useState<number | string>(7);
   const [force, setForce] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -151,7 +151,18 @@ export default function NewKitPage() {
               min={1}
               max={60}
               value={days}
-              onChange={(e) => setDays(Number(e.target.value))}
+              onChange={(e) => {
+                const val = e.target.value;
+                setDays(val === "" ? "" : Number(val));
+              }}
+              onBlur={() => {
+                if (days === "" || Number(days) < 1) {
+                  setDays(1);
+                } else if (Number(days) > 60) {
+                  setDays(60);
+                }
+              }}
+              placeholder="7"
               required
             />
             <label className="flex items-center gap-2 text-sm text-slate-300">

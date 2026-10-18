@@ -22,7 +22,13 @@ export async function api<T = any>(
   });
 
   if (res.status === 401) {
-    if (typeof window !== "undefined") {
+    if (
+      typeof window !== "undefined" &&
+      path !== "/api/auth/me" &&
+      !window.location.pathname.startsWith("/login") &&
+      !window.location.pathname.startsWith("/register") &&
+      window.location.pathname !== "/"
+    ) {
       window.location.href = "/login";
     }
     throw { error: { code: "UNAUTHENTICATED", message: "Unauthenticated" } };
