@@ -15,6 +15,10 @@
     "dev:web": "npm run dev -w @aiprepkit/frontend",
     "dev:frontend": "npm run dev -w @aiprepkit/frontend",
     "build": "npm run build -w @aiprepkit/core && npm run build -w @aiprepkit/backend && npm run build -w @aiprepkit/frontend",
+    "build:backend": "npm run build -w @aiprepkit/core && npm run build -w @aiprepkit/backend",
+    "start:backend": "node backend/dist/index.js",
+    "build:frontend": "npm run build -w @aiprepkit/core && npm run build -w @aiprepkit/frontend",
+    "start:frontend": "npm run start -w @aiprepkit/frontend",
     "test": "npm run test -w @aiprepkit/core && npm run test -w @aiprepkit/backend"
   },
   "engines": {
