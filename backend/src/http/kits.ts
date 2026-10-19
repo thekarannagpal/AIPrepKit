@@ -572,7 +572,16 @@ function publicKit(doc: any, opts: { summary?: boolean } = {}) {
       uncovered_must: doc.kit?.coverage?.uncovered_must_requirement_ids?.length ?? null,
     };
   }
-  return { ...base, kit: doc.kit ?? null };
+  const kitData = doc.kit ? (typeof doc.kit.toObject === "function" ? doc.kit.toObject() : doc.kit) : null;
+  return {
+    ...base,
+    role_title: kitData?.role?.title ?? "",
+    company: kitData?.source?.company ?? "",
+    days: kitData?.schedule?.days_available ?? doc.input?.days ?? 1,
+    uncovered_must: kitData?.coverage?.uncovered_must_requirement_ids?.length ?? null,
+    ...(kitData || {}),
+    kit: kitData ?? null,
+  };
 }
 
 function stripToQuestion(q: z.infer<typeof QuestionSchema>): Kit["questions"][number] {

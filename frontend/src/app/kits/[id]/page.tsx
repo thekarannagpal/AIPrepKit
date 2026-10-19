@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { apiGet, apiPost } from "@/lib/api";
 import { Card } from "@/components/Card";
 import { Button } from "@/components/Button";
@@ -37,23 +38,23 @@ interface KitData {
   coverage?: any;
   notes?: string[];
   source?: any;
+  kit?: any;
 }
 
 export default function KitPage() {
   const params = useParams();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const id = params.id as string;
-  const hash = typeof window !== "undefined" ? window.location.hash.slice(1) : "";
 
   const [kit, setKit] = useState<KitData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState(hash || "Brief");
+  const [activeTab, setActiveTab] = useState("Brief");
   const [saveStatus, setSaveStatus] = useState<"Saving…" | "Saved" | "Unsaved changes" | "">("");
   const [editedBrief, setEditedBrief] = useState<any>(null);
   const [editedQuestions, setEditedQuestions] = useState<Question[]>([]);
   const [editedFlashcards, setEditedFlashcards] = useState<Flashcard[]>([]);
+  const [regeneratingSection, setRegeneratingSection] = useState<string | null>(null);
 
   const { save, debouncedSave, updateVersion } = useSectionSave<KitData>(id);
 
@@ -63,12 +64,30 @@ export default function KitPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await apiGet<{ kit: KitData }>(`/api/kits/${id}`);
-      setKit(res.kit);
-      setEditedBrief(res.kit.company_brief);
-      setEditedQuestions(res.kit.questions || []);
-      setEditedFlashcards(res.kit.flashcards || []);
-      updateVersion(res.kit.version);
+      const res = await apiGet<{ kit: any }>(`/api/kits/${id}`);
+      const raw = res.kit;
+      const inner = raw.kit || raw;
+      const merged: KitData = {
+        ...raw,
+        ...inner,
+        role_title: raw.role_title || inner.role?.title || raw.role?.title || "Untitled",
+        company: raw.company || inner.source?.company || raw.source?.company || "",
+        days: raw.days || inner.schedule?.days_available || raw.input?.days || 1,
+        uncovered_must: raw.uncovered_must ?? inner.coverage?.uncovered_must_requirement_ids?.length ?? 0,
+        role: inner.role || raw.role,
+        company_brief: inner.company_brief || raw.company_brief,
+        questions: inner.questions || raw.questions || [],
+        flashcards: inner.flashcards || raw.flashcards || [],
+        schedule: inner.schedule || raw.schedule,
+        coverage: inner.coverage || raw.coverage,
+        notes: inner.notes || raw.notes || [],
+        source: inner.source || raw.source,
+      };
+      setKit(merged);
+      setEditedBrief(merged.company_brief || null);
+      setEditedQuestions(merged.questions || []);
+      setEditedFlashcards(merged.flashcards || []);
+      updateVersion(raw.version);
     } catch (err: any) {
       setError(err?.error?.message || "Failed to load kit");
     } finally {
@@ -81,14 +100,24 @@ export default function KitPage() {
   }, [fetchKit]);
 
   useEffect(() => {
-    if (hash) setActiveTab(hash);
-  }, [hash]);
+    if (typeof window === "undefined") return;
+    const handleHash = () => {
+      const h = window.location.hash.slice(1);
+      if (tabs.includes(h)) {
+        setActiveTab(h);
+      }
+    };
+    handleHash();
+    window.addEventListener("hashchange", handleHash);
+    return () => window.removeEventListener("hashchange", handleHash);
+  }, []);
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && activeTab) {
-      window.location.hash = activeTab;
+  const changeTab = (newTab: string) => {
+    setActiveTab(newTab);
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", `#${newTab}`);
     }
-  }, [activeTab]);
+  };
 
   if (loading) {
     return (
@@ -138,6 +167,27 @@ export default function KitPage() {
     });
   };
 
+  const handleRegenerate = async (section: string, confirmMessage: string) => {
+    if (!confirm(confirmMessage)) return;
+    setRegeneratingSection(section);
+    try {
+      const res = await apiPost(`/api/kits/${id}/regenerate`, { section });
+      if (res.summary) {
+        showToast(
+          `kept:${res.summary.kept} replaced:${res.summary.replaced} added:${res.summary.added}`,
+          "success"
+        );
+      } else {
+        showToast("Section regenerated successfully", "success");
+      }
+      await fetchKit();
+    } catch (err: any) {
+      showToast(err?.error?.message || "Regenerate failed", "error");
+    } finally {
+      setRegeneratingSection(null);
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 flex flex-col gap-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -152,6 +202,11 @@ export default function KitPage() {
             {saveStatus && <span className="text-xs text-slate-400">{saveStatus}</span>}
           </div>
         </div>
+        <div className="flex items-center gap-2">
+          <Link href={`/kits/${id}/practice`}>
+            <Button variant="primary">Practice Flashcards</Button>
+          </Link>
+        </div>
       </div>
 
       <div className="flex gap-1 border-b border-slate-800 overflow-x-auto">
@@ -163,7 +218,7 @@ export default function KitPage() {
                 ? "border-indigo-500 text-slate-100"
                 : "border-transparent text-slate-400 hover:text-slate-100"
             }`}
-            onClick={() => setActiveTab(tab)}
+            onClick={() => changeTab(tab)}
             aria-selected={activeTab === tab}
           >
             {tab}
@@ -171,27 +226,42 @@ export default function KitPage() {
         ))}
       </div>
 
-      {activeTab === "Brief" && editedBrief && (
+      {activeTab === "Brief" && (
         <Card className="flex flex-col gap-3">
+          <div className="flex justify-between items-center">
+            <h3 className="font-medium text-slate-100">Company Brief</h3>
+            <Button
+              variant="ghost"
+              disabled={regeneratingSection !== null}
+              onClick={() => handleRegenerate("company_brief", "Regenerate company brief from researched pages?")}
+              className="px-2 py-1 text-sm"
+            >
+              {regeneratingSection === "company_brief" ? "Regenerating…" : "Regenerate brief"}
+            </Button>
+          </div>
           <Textarea
             label="Summary"
-            value={editedBrief.summary || ""}
+            value={editedBrief?.summary || ""}
             onChange={(e) => handleBriefChange("summary", e.target.value)}
             className="min-h-[100px]"
           />
           <Textarea
             label="What they do"
-            value={editedBrief.what_they_do || ""}
+            value={editedBrief?.what_they_do || ""}
             onChange={(e) => handleBriefChange("what_they_do", e.target.value)}
             className="min-h-[100px]"
           />
           <div>
             <p className="text-sm text-slate-300 mb-1">Sources</p>
-            <ul className="text-sm text-slate-400 list-disc list-inside">
-              {editedBrief.sources?.map((s: string, i: number) => (
-                <li key={i}>{s}</li>
-              ))}
-            </ul>
+            {editedBrief?.sources?.length ? (
+              <ul className="text-sm text-slate-400 list-disc list-inside">
+                {editedBrief.sources.map((s: string, i: number) => (
+                  <li key={i}>{s}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs text-slate-500 italic">No external sources used.</p>
+            )}
           </div>
           {kit.notes && kit.notes.length > 0 && (
             <div>
@@ -206,55 +276,59 @@ export default function KitPage() {
         </Card>
       )}
 
-      {activeTab === "Role" && kit.role && (
-        <Card className="flex flex-col gap-3">
-          <Input label="Title" value={kit.role.title || ""} readOnly />
-          <Input label="Seniority" value={kit.role.seniority || ""} readOnly />
-          <div>
-            <p className="text-sm text-slate-300 mb-1">Responsibilities</p>
-            <ul className="text-sm text-slate-400 list-disc list-inside">
-              {kit.role.responsibilities?.map((r: string, i: number) => (
-                <li key={i}>{r}</li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <p className="text-sm text-slate-300 mb-1">Requirements</p>
-            <div className="flex flex-col gap-2">
-              {kit.role.requirements?.map((req: any) => (
-                <div
-                  key={req.id}
-                  className="border border-slate-800 rounded-xl p-3 flex flex-col gap-1"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-400">{req.id}</span>
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs border ${
-                        req.kind === "technical"
-                          ? "bg-blue-500/20 text-blue-300 border-blue-500/40"
-                          : req.kind === "behavioural"
-                          ? "bg-purple-500/20 text-purple-300 border-purple-500/40"
-                          : "bg-slate-500/20 text-slate-300 border-slate-500/40"
-                      }`}
-                    >
-                      {req.kind}
-                    </span>
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs border ${
-                        req.priority === "must"
-                          ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
-                          : "bg-slate-500/20 text-slate-300 border-slate-500/40"
-                      }`}
-                    >
-                      {req.priority}
-                    </span>
-                  </div>
-                  <p className="text-sm">{req.text}</p>
-                </div>
-              ))}
+      {activeTab === "Role" && (
+        kit.role ? (
+          <Card className="flex flex-col gap-3">
+            <Input label="Title" value={kit.role.title || ""} readOnly />
+            <Input label="Seniority" value={kit.role.seniority || ""} readOnly />
+            <div>
+              <p className="text-sm text-slate-300 mb-1">Responsibilities</p>
+              <ul className="text-sm text-slate-400 list-disc list-inside">
+                {kit.role.responsibilities?.map((r: string, i: number) => (
+                  <li key={i}>{r}</li>
+                ))}
+              </ul>
             </div>
-          </div>
-        </Card>
+            <div>
+              <p className="text-sm text-slate-300 mb-1">Requirements</p>
+              <div className="flex flex-col gap-2">
+                {kit.role.requirements?.map((req: any) => (
+                  <div
+                    key={req.id}
+                    className="border border-slate-800 rounded-xl p-3 flex flex-col gap-1"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-slate-400">{req.id}</span>
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs border ${
+                          req.kind === "technical"
+                            ? "bg-blue-500/20 text-blue-300 border-blue-500/40"
+                            : req.kind === "behavioural"
+                            ? "bg-purple-500/20 text-purple-300 border-purple-500/40"
+                            : "bg-slate-500/20 text-slate-300 border-slate-500/40"
+                        }`}
+                      >
+                        {req.kind}
+                      </span>
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs border ${
+                          req.priority === "must"
+                            ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                            : "bg-slate-500/20 text-slate-300 border-slate-500/40"
+                        }`}
+                      >
+                        {req.priority}
+                      </span>
+                    </div>
+                    <p className="text-sm">{req.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+        ) : (
+          <Card><p className="text-sm text-slate-400">No role requirements extracted yet.</p></Card>
+        )
       )}
 
       {activeTab === "Questions" && (
@@ -268,24 +342,11 @@ export default function KitPage() {
                   <div className="flex gap-2 flex-wrap">
                     <Button
                       variant="ghost"
-                      onClick={async () => {
-                        if (!confirm(`Regenerate ${cat}?`)) return;
-                        try {
-                          const res = await apiPost(`/api/kits/${id}/regenerate`, {
-                            section: `questions:${cat}`,
-                          });
-                          showToast(
-                            `kept:${res.summary.kept} replaced:${res.summary.replaced} added:${res.summary.added}`,
-                            "success"
-                          );
-                          fetchKit();
-                        } catch (err: any) {
-                          showToast(err?.error?.message || "Regenerate failed", "error");
-                        }
-                      }}
+                      disabled={regeneratingSection !== null}
+                      onClick={() => handleRegenerate(`questions:${cat}`, `Regenerate ${cat}?`)}
                       className="px-2 py-1 text-sm"
                     >
-                      Regenerate
+                      {regeneratingSection === `questions:${cat}` ? "Regenerating…" : "Regenerate"}
                     </Button>
                     <Button
                       variant="ghost"
@@ -377,23 +438,10 @@ export default function KitPage() {
           })}
           <Button
             variant="ghost"
-            onClick={async () => {
-              if (!confirm("Regenerate all questions?")) return;
-              try {
-                const res = await apiPost(`/api/kits/${id}/regenerate`, {
-                  section: "questions",
-                });
-                showToast(
-                  `kept:${res.summary.kept} replaced:${res.summary.replaced} added:${res.summary.added}`,
-                  "success"
-                );
-                fetchKit();
-              } catch (err: any) {
-                showToast(err?.error?.message || "Regenerate failed", "error");
-              }
-            }}
+            disabled={regeneratingSection !== null}
+            onClick={() => handleRegenerate("questions", "Regenerate all questions?")}
           >
-            Regenerate all questions
+            {regeneratingSection === "questions" ? "Regenerating all…" : "Regenerate all questions"}
           </Button>
         </div>
       )}
@@ -403,23 +451,10 @@ export default function KitPage() {
           <div className="flex justify-between">
             <Button
               variant="ghost"
-              onClick={async () => {
-                if (!confirm("Regenerate flashcards?")) return;
-                try {
-                  const res = await apiPost(`/api/kits/${id}/regenerate`, {
-                    section: "flashcards",
-                  });
-                  showToast(
-                    `kept:${res.summary.kept} replaced:${res.summary.replaced} added:${res.summary.added}`,
-                    "success"
-                  );
-                  fetchKit();
-                } catch (err: any) {
-                  showToast(err?.error?.message || "Regenerate failed", "error");
-                }
-              }}
+              disabled={regeneratingSection !== null}
+              onClick={() => handleRegenerate("flashcards", "Regenerate flashcards?")}
             >
-              Regenerate flashcards
+              {regeneratingSection === "flashcards" ? "Regenerating…" : "Regenerate flashcards"}
             </Button>
             <Button
               variant="ghost"
@@ -478,20 +513,10 @@ export default function KitPage() {
           <div className="flex justify-between">
             <Button
               variant="ghost"
-              onClick={async () => {
-                if (!confirm("Regenerate schedule?")) return;
-                try {
-                  const res = await apiPost(`/api/kits/${id}/regenerate`, {
-                    section: "schedule",
-                  });
-                  showToast("Schedule regenerated", "success");
-                  fetchKit();
-                } catch (err: any) {
-                  showToast(err?.error?.message || "Regenerate failed", "error");
-                }
-              }}
+              disabled={regeneratingSection !== null}
+              onClick={() => handleRegenerate("schedule", "Regenerate schedule?")}
             >
-              Regenerate schedule
+              {regeneratingSection === "schedule" ? "Regenerating…" : "Regenerate schedule"}
             </Button>
           </div>
           <ScheduleView schedule={kit.schedule} />

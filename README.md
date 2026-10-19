@@ -26,7 +26,7 @@ regenerate sections, practise with confidence-tracked flashcards, and compare tw
 | Shared core | `packages/kit-core` (zod schema, coverage, schedule, validation) | The structure the graders validate, the coverage maths and the schedule allocator must behave identically in the API, the batch CLI and the tests. One package, one implementation, imported by all three. |
 | LLM | Gemini free tier by default (raw REST, JSON mode), OpenAI-compatible option, mock provider | Free tier is mandated; raw REST avoids SDK weight; the mock provider makes tests, demos and the graders' runs reproducible with **no API key at all**. |
 
-The repo is an **npm workspaces monorepo**: `packages/kit-core`, `server`, `web`, plus
+The repo is an **npm workspaces monorepo**: `packages/kit-core`, `backend`, `frontend`, plus
 `samples/` (fixture site, sample cases, verifiers). One `npm install` at the root installs
 everything.
 
@@ -69,10 +69,10 @@ Then run:
 mongod          # or: docker run -d -p 27017:27017 mongo:7
 
 # Terminal 2 — API on :4000
-npm run dev:api
+npm run dev:backend   # or npm run dev:api
 
-# Terminal 3 — Web on :3000
-npm run dev:web
+# Terminal 3 — Frontend on :3000
+npm run dev:frontend  # or npm run dev:web
 
 # Terminal 4 (optional) — local fixture company site on :4173, for a
 # localhost site to crawl in demos and the smoke test
@@ -86,8 +86,8 @@ Open http://localhost:3000, register, and create a kit against
 Tests and production build:
 
 ```bash
-npm test          # kit-core suite + server suite
-npm run build      # builds core, server, web
+npm test          # kit-core suite + backend suite
+npm run build      # builds core, backend, frontend
 ```
 
 End-to-end smoke test against a running stack (auth → SSE generation → structure →
@@ -129,7 +129,7 @@ Behaviour guarantees:
   **run continues** to the next case; only usage errors (missing args), a missing LLM key,
   or a crash exit non-zero (exit code `2`, with guidance on stderr).
 - Relative input/output paths resolve from the directory you invoked npm in, even though
-  npm runs the script inside `server/`.
+  npm runs the script inside `backend/`.
 - Missing provider key → immediate exit `2` with instructions (including how to run the
   mock offline) rather than a doomed 15-minute run.
 
@@ -141,12 +141,12 @@ node samples/verify-kits.cjs samples/kits.sample.json   # "SHAPE OK"
 
 Public deployment targets a free tier everywhere:
 
-- **Frontend — Vercel**: import the repo, set root directory `web/`. The
+- **Frontend — Vercel**: import the repo, set root directory `frontend/`. The
   `next.config.mjs` rewrite proxies `/api/*` to the API URL, so the only variable needed
   is server-side: `NEXT_PUBLIC_API_URL=https://<your-api-host>`. (It is read by the Next
   server at request time through the rewrite; no secrets ever reach the browser bundle.)
 - **Backend — Render (or any Node host)**: build `npm install && npm run build`, start
-  `npm run start -w @aiprepkit/server` (i.e. `node server/dist/index.js`). Set
+  `npm run start -w @aiprepkit/backend` (i.e. `node backend/dist/index.js`). Set
   `NODE_ENV=production`, `MONGODB_URI=<Atlas URI>`, a strong `SESSION_SECRET`,
   `WEB_ORIGIN=https://<your-web-host>`, and your LLM variables. Health check: `GET /api/health`.
 - **Database — MongoDB Atlas M0**: create a cluster, allow the API host's egress, put the
@@ -183,7 +183,7 @@ Public deployment targets a free tier everywhere:
 ## 4. High-level architecture
 
 ```
-Browser ── same-origin /api/* ──> Next.js (web/) ── rewrite proxy ──> Express API (server/)
+Browser ── same-origin /api/* ──> Next.js (frontend/) ── rewrite proxy ──> Express API (backend/)
                                                                       │  auth (session cookie, httpOnly)
                                                                       │  /api/kits CRUD + SSE /events
                                                                       │  practice, compare, regenerate
@@ -211,7 +211,7 @@ MongoDB (kits, users, sessions, practice)  ◄──────────· s
   document are serialized through a single save queue (mongoose rejects concurrent
   `save()` calls on one document), and the fire-and-forget wrapper catches rejections so a
   transient DB error can never crash the process.
-- **Batch mode** (`server/src/evaluate.ts`) reads a JSON array of cases, runs them
+- **Batch mode** (`backend/src/evaluate.ts`) reads a JSON array of cases, runs them
   sequentially with a per-case timeout, and writes the Appendix-B file. It never touches
   MongoDB — it is a pure pipeline runner, which is why it works from a clean clone with
   only an LLM key (or the mock).
@@ -364,9 +364,9 @@ Pure arithmetic in `packages/kit-core/src/schedule.ts` — never an LLM prompt:
 minutes, 1- and 60-day edges), coverage checking (uncovered musts detected, recompute
 after fills), and structure validation (Appendix-A shape accepts valid kits and rejects
 malformed ones) — the three behaviours the brief explicitly requires, plus schema edge
-cases. The server suite (`npm run test -w @aiprepkit/server`) adds hermetic integration
+cases. The backend suite (`npm run test -w @aiprepkit/backend`) adds hermetic integration
 tests for auth, dedupe, regeneration survival, crawl guards (robots, SSRF, size/type
-limits), rate-limit backoff and the batch CLI — **37 core + 60 server tests, all green**.
+limits), rate-limit backoff and the batch CLI — **37 core + 60 backend tests, all green**.
 
 ---
 

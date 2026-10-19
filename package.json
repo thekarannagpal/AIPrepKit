@@ -5,15 +5,17 @@
   "description": "Turns a job description into a personalised interview preparation kit.",
   "workspaces": [
     "packages/*",
-    "server",
-    "web"
+    "backend",
+    "frontend"
   ],
   "scripts": {
-    "evaluate": "npm run build -w @aiprepkit/core && npm run evaluate -w @aiprepkit/server --",
-    "dev:api": "npm run dev -w @aiprepkit/server",
-    "dev:web": "npm run dev -w @aiprepkit/web",
-    "build": "npm run build -w @aiprepkit/core && npm run build -w @aiprepkit/server && npm run build -w @aiprepkit/web",
-    "test": "npm run test -w @aiprepkit/core && npm run test -w @aiprepkit/server"
+    "evaluate": "npm run build -w @aiprepkit/core && npm run evaluate -w @aiprepkit/backend --",
+    "dev:api": "npm run dev -w @aiprepkit/backend",
+    "dev:backend": "npm run dev -w @aiprepkit/backend",
+    "dev:web": "npm run dev -w @aiprepkit/frontend",
+    "dev:frontend": "npm run dev -w @aiprepkit/frontend",
+    "build": "npm run build -w @aiprepkit/core && npm run build -w @aiprepkit/backend && npm run build -w @aiprepkit/frontend",
+    "test": "npm run test -w @aiprepkit/core && npm run test -w @aiprepkit/backend"
   },
   "engines": {
     "node": ">=20"
