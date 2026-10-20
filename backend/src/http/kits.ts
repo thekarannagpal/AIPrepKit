@@ -263,15 +263,16 @@ kitsRouter.get("/:id/events", async (req: AuthedRequest, res, next) => {
   try {
     const doc = await ownKit(req);
     // Replay the current state first so a late subscriber is not blind.
+    const unsubscribe = subscribe(String(doc._id), res);
     res.write(
       `data: ${JSON.stringify({
         type: "snapshot",
         status: doc.status,
         steps: doc.steps,
-        error: doc.error ?? null,
+        error: doc.error?.code ? doc.error : null,
       })}\n\n`
     );
-    const unsubscribe = subscribe(String(doc._id), res);
+    
     req.on("close", unsubscribe);
   } catch (err) {
     next(err);

@@ -36,7 +36,7 @@ export function GenerationProgress({ kitId }: { kitId: string }) {
         if (data.type === "snapshot") {
           if (data.steps) setSteps(data.steps);
           if (data.status) setProgress(data.status);
-          if (data.error) setError(data.error);
+          if (data.error?.code) setError(data.error);
           // The kit may have finished between the page's last fetch and this
           // subscription attaching; there will be no `done` event to catch it.
           if (data.status === "complete") {
@@ -72,7 +72,7 @@ export function GenerationProgress({ kitId }: { kitId: string }) {
           setDone(true);
           window.location.reload();
         } else if (data.type === "failed") {
-          if (data.error) setError(data.error);
+          if (data.error?.code) setError(data.error);
           es.close();
         }
       } catch (e) {
@@ -85,7 +85,7 @@ export function GenerationProgress({ kitId }: { kitId: string }) {
     return () => es.close();
   }, [kitId]);
 
-  if (error) {
+  if (error && error.code) {
     return (
       <ErrorState
         title={`Failed: ${error.code}`}
