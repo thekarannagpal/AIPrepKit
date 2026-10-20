@@ -522,7 +522,7 @@ async function generateByCategory(
       out.push({
         id: "",
         requirement_ids: refs,
-        category: q.category ?? fallbackCategory,
+        category: fallbackCategory,
         prompt: q.prompt.trim(),
         answer_outline: q.answer_outline.trim(),
         difficulty: q.difficulty,
@@ -541,13 +541,14 @@ async function generateByCategory(
     );
     push(QuestionBatchSchema.safeParse(batch).data ?? batch, "technical", new Set(technical.map((r) => r.id)));
   }
-  if (behavioural.length) {
+  const behTargets = behavioural.length ? behavioural : requirements.slice(0, 3);
+  if (behTargets.length) {
     progress(`behavioural (${behavioural.length} requirement(s))`);
     const batch = await llm.json<z.infer<typeof QuestionBatchSchema>>(
-      P.questionsPrompt("behavioural", behavioural, ctx),
+      P.questionsPrompt("behavioural", behTargets, ctx),
       { temperature: 0.7 }
     );
-    push(QuestionBatchSchema.safeParse(batch).data ?? batch, "behavioural", new Set(behavioural.map((r) => r.id)));
+    push(QuestionBatchSchema.safeParse(batch).data ?? batch, "behavioural", new Set(behTargets.map((r) => r.id)));
   }
   if (architecture.length || (seniorish && technical.length)) {
     const target = architecture.length ? architecture : technical.slice(0, 3);
@@ -738,3 +739,4 @@ async function guessCompanyName(jd: string, companyUrl: string, llm: LlmClient):
   }
   return { name: "" };
 }
+

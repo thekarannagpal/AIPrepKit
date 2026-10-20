@@ -171,9 +171,9 @@ function filterForCategory<T extends { id: string; text: string; kind: string }>
     case "technical":
       return requirements.filter((r) => r.kind === "technical");
     case "behavioural":
-      return requirements.filter((r) => r.kind === "behavioural");
+      { const mb = requirements.filter((r) => r.kind === "behavioural"); return mb.length ? mb : requirements.slice(0, 3); }
     case "system-design":
-      return requirements.filter((r) => /architect|scale|distributed|system|infra|platform|data model|migration/i.test(r.text));
+      { const ms = requirements.filter((r) => /architect|scale|distributed|system|infra|platform|data model|migration/i.test(r.text)); return ms.length ? ms : requirements.slice(0, 3); }
     case "company-fit":
       return requirements.filter((r) => r.kind === "domain" || r.kind === "technical");
     default:
