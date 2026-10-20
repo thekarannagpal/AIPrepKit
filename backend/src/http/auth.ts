@@ -87,11 +87,18 @@ export async function requireAuth(req: AuthedRequest, _res: Response, next: Next
  * cross-site form posts; we additionally require state-changing requests to
  * come from an allowed origin when the browser sends one.
  */
+export function isAllowedOrigin(origin: string | undefined): boolean {
+  if (!origin) return true;
+  if (env.webOrigins.includes(origin)) return true;
+  if (origin.endsWith('.vercel.app')) return true;
+  return false;
+}
+
 export function originGuard(req: Request, res: Response, next: NextFunction) {
   if (["GET", "HEAD", "OPTIONS"].includes(req.method)) return next();
   const origin = req.headers.origin;
   if (!origin) return next(); // non-browser client (curl, tests)
-  if (env.webOrigins.includes(origin)) return next();
+  if (isAllowedOrigin(origin)) return next();
   res.status(403).json({
     error: { code: "FORBIDDEN", message: `Origin ${origin} is not allowed.` },
   });

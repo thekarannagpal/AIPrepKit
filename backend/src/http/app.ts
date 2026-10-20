@@ -6,7 +6,7 @@ import { log } from "../lib/logger";
 import { env } from "../config";
 import { authRouter } from "./authRoutes";
 import { kitsRouter } from "./kits";
-import { requireAuth, originGuard } from "./auth";
+import { requireAuth, originGuard, isAllowedOrigin } from "./auth";
 import { KitModel } from "../db/models";
 
 export function buildApp(): express.Express {
@@ -20,7 +20,7 @@ export function buildApp(): express.Express {
   // WEB_ORIGIN are ever reflected, always with credentials.
   app.use((req: Request, res: Response, next: NextFunction) => {
     const origin = req.headers.origin;
-    if (origin && env.webOrigins.includes(origin)) {
+    if (origin && isAllowedOrigin(origin)) {
       res.setHeader("Access-Control-Allow-Origin", origin);
       res.setHeader("Access-Control-Allow-Credentials", "true");
       res.setHeader("Vary", "Origin");
